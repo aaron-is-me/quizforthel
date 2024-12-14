@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Love Quiz</title>
+    <!-- Google Font: Padauk -->
+    <link href="https://fonts.googleapis.com/css2?family=Padauk&display=swap" rel="stylesheet">
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            font-family: 'Padauk', sans-serif;
+            background-color: #f4f8fb;
+            text-align: center;
+            padding: 20px;
+            height: 100%;
+        }
+        .quiz-container {
+           
+            background-color: #c0e6f6;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            max-width: 100%;
+            width: 400px;
+            margin: 30% auto;
+        }
+        .question {
+            font-size: 1.5em;
+            margin-bottom: 20px;
+        }
+        .options button {
+            padding: 12px;
+            font-size: 1.2em;
+            background-color: #3399b8;
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            display: block;
+            width: 100%;
+            margin-bottom: 10px;
+        }
+
+        .options button:hover {
+            background-color: #ff4c4c;
+        }
+        #timer {
+            font-size: 1.2em;
+            margin-bottom: 20px;
+        }
+        #score-container {
+            display: none;
+        }
+        .button {
+            margin-top: 20px;
+            padding: 10px;
+            font-size: 1.2em;
+            background-color: #4caf50;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+        .button:hover {
+            background-color: #45a049;
+        }
+        .incorrect {
+            color: #ff4c4c;
+        }
+        .correct {
+            color: #4caf50;
+            font-weight: bolder;
+        }
+
+        /* Responsive styles */
+        @media (max-width: 600px) {
+            .quiz-container {
+                margin-top: 50%;
+                padding: 15px;
+                width: 90%;
+                margin-top: 50%;
+            }
+            .question {
+                font-size: 1.2em;
+            }
+            .options button {
+                padding: 10px;
+                font-size: 1em;
+            }
+            #timer {
+                font-size: 1em;
+            }
+            .button {
+                font-size: 1em;
+            }
+        }
+
+        @media (max-width: 400px) {
+            .quiz-container {
+                margin-top: 10%;
+                padding: 10px;
+                width: 95%;
+            }
+            .question {
+                font-size: 1em;
+            }
+            .options button {
+                padding: 8px;
+                font-size: 0.9em;
+            }
+            #timer {
+                font-size: 0.9em;
+            }
+            .button {
+                font-size: 0.9em;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="quiz-container">
+    <div id="quiz" class="quiz-content">
+        <div id="question" class="question"></div>
+        <div id="options" class="options"></div>
+     
+    </div>
+    <div id="score-container">
+        <h2 class="text-2xl">Your Score:</h2>
+        <div id="score" class="text-xl mb-4"></div>
+        <div id="answers-container"></div>
+        <button class="button" onclick="restartQuiz()">Restart Quiz</button>
+    </div>
+</div>
+
+<script>
+    // Function to shuffle an array (used for randomizing questions)
+    function shuffleArray(arr) {
+        for (let i = arr.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [arr[i], arr[j]] = [arr[j], arr[i]]; // Swap elements
+        }
+    }
+
+    // Questions data
+    const questions = [
+        {
+            question: "ကိုကိုတို့ anniversary က ",
+            options: ["July 26", "August 15", "June 12"],
+            correct: 0
+        },
+        {
+            question: "ကိုကိုတို့ ဘယ်နေ့မှာ စပြီး တွေ့ တာလဲ",
+            options: ["October 12", "November 22", "December 5"],
+            correct: 0
+        },
+        {
+            question: "ကိုကိုနဲ့‌ တွေ့တော့သဲသဲ သောက်တာက",
+            options: ["Cake", "Milo", "Tea"],
+            correct: 1
+        },
+        {
+            question: "ကိုကိုမွေးနေ့က",
+            options: ["7-3-2005", "3-7-2004", "3-7-2005"],
+            correct: 2
+        },
+        {
+            question: "pc မှာကိုကို တို့ ဘယ်နှစ်ခါတွေ့ဖူးလဲ",
+            options: ["5", "2", "3"],
+            correct: 1
+        },
+        {
+            question: "သဲသဲနဲ့တွဲခါစ ကိုကိုကြည့်တဲ့ဇာတ်ကားကနာမည်မှတ်မိသေးလား",
+            options: ["အလန်းလွန် အလွန်လန်း", "မယ်ချို", "အထာသစ်နဲ့ နှစ်ခါချစ်မယ်"],
+            correct: 1
+        },
+        {
+            question: "သဲသဲနဲ့ပထမဆုံး date မှာတုန်းက ကိုကို ထီးယူလာမိလား",
+            options: ["နိုး", "ရက်စ်", "မမှတ်မိတော့ဘူး"],
+            correct: 1
+        },
+        {
+            question: "ကိုကို ပထမဆုံးပေးတဲ့ လက်ဆောင်က ဘာဖြစ်မလဲ",
+            options: ["ပန်းစည်း", "လက်စွတ်", "vest"],
+            correct: 0
+        },
+        {
+            question: "What color was my dress on our first date?",
+            options: ["Red", "White", "Black"],
+            correct: 2
+        },
+        {
+            question: "What is my biggest dream?",
+            options: ["Travel the world", "Become a doctor", "Become your husband"],
+            correct: 2
+        },
+        {
+            question: "ကိုကို ဘယ်ဟာကို အကြိုက်ဆုံးဖြစ်ခဲ့တယ်ထင်လဲ",
+            options: ["Our first date", "Our movie date", "Our first argument"],
+            correct: 1
+        },
+        {
+            question: "How long did we date before becoming a couple?",
+            options: ["1 month", "2 months", "4 months"],
+            correct: 1
+        },
+        {
+            question: "Which movie did we watch together on our movie date?",
+            options: ["Inside Out 2", "Titanic", "The Fault in Our Stars"],
+            correct: 0
+        },
+        {
+            question: "What is love?",
+            options: ["A feeling", "A choice", "Both"],
+            correct: 2
+        },
+        {
+            question: "What do you think is the best way to show love?",
+            options: ["Gift-giving", "Spending quality time", "Words of affirmation"],
+            correct: 1
+        },
+        {
+            question: "True or False: Love is unconditional.",
+            options: ["True", "False"],
+            correct: 0
+        },
+        {
+            question: "How often do you think you should say 'I love you' in a relationship?",
+            options: ["Once a day", "When you feel it", "Once a week"],
+            correct: 1
+        },
+        {
+            question: "What is the most important thing to maintain in a relationship?",
+            options: ["Mutual respect", "Romance", "Financial stability"],
+            correct: 0
+        },
+        {
+            question: "What is my love language?",
+            options: ["Words of affirmation", "Acts of service", "Physical touch"],
+            correct: 2
+        },
+        {
+            question: "Do you believe that soulmates exist?",
+            options: ["Yes", "No"],
+            correct: 0
+        },
+        {
+            question: "What does true love require?",
+            options: ["Patience", "Understanding", "Both"],
+            correct: 2
+        },
+        {
+            question: "Which of these qualities is most important in a relationship?",
+            options: ["Loyalty", "Compassion", "Humor"],
+            correct: 0
+        }
+    ];
+
+    let currentQuestionIndex = 0;
+    let score = 0;
+    const timeLimit = 10;
+    let selectedAnswers = [];
+
+    const questionElement = document.getElementById("question");
+    const optionsElement = document.getElementById("options");
+    const timerElement = document.getElementById("timer");
+    const scoreContainer = document.getElementById("score-container");
+    const quizContainer = document.getElementById("quiz");
+    const answersContainer = document.getElementById("answers-container");
+
+    function loadQuestion() {
+        const currentQuestion = questions[currentQuestionIndex];
+        questionElement.textContent = currentQuestion.question;
+        optionsElement.innerHTML = "";
+
+        currentQuestion.options.forEach((option, index) => {
+            const button = document.createElement("button");
+            button.textContent = option;
+            button.classList.add("hover:bg-red-500");
+            button.onclick = () => checkAnswer(index, option);
+            optionsElement.appendChild(button);
+        });
+
+        startTimer();
+    }
+
+    function startTimer() {
+        let timeLeft = timeLimit;
+        timerElement.textContent = `Time left: ${timeLeft}s`;
+        const timerInterval = setInterval(() => {
+            timeLeft--;
+            timerElement.textContent = `Time left: ${timeLeft}s`;
+
+            if (timeLeft <= 0) {
+                clearInterval(timerInterval);
+                nextQuestion();
+            }
+        }, 1000);
+    }
+
+    function checkAnswer(index, option) {
+        const currentQuestion = questions[currentQuestionIndex];
+        if (index === currentQuestion.correct) {
+            score++;
+            selectedAnswers.push({
+                question: currentQuestion.question,
+                selectedAnswer: option,
+                correctAnswer: currentQuestion.options[currentQuestion.correct],
+                isCorrect: true
+            });
+        } else {
+            selectedAnswers.push({
+                question: currentQuestion.question,
+                selectedAnswer: option,
+                correctAnswer: currentQuestion.options[currentQuestion.correct],
+                isCorrect: false
+            });
+        }
+
+        nextQuestion();
+    }
+
+    function nextQuestion() {
+        currentQuestionIndex++;
+
+        if (currentQuestionIndex < questions.length) {
+            loadQuestion();
+        } else {
+            showScore();
+        }
+    }
+
+    function showScore() {
+        quizContainer.style.display = "none";
+        scoreContainer.style.display = "block";
+        document.getElementById("score").textContent = `${score} out of ${questions.length}`;
+
+        selectedAnswers.forEach(answer => {
+            const answerDiv = document.createElement("div");
+            answerDiv.textContent = `${answer.question} - Your answer: ${answer.selectedAnswer} - Correct answer: ${answer.correctAnswer}`;
+            if (answer.isCorrect) {
+                answerDiv.classList.add("correct");
+            } else {
+                answerDiv.classList.add("incorrect");
+            }
+            answersContainer.appendChild(answerDiv);
+        });
+    }
+
+    function restartQuiz() {
+        currentQuestionIndex = 0;
+        score = 0;
+        selectedAnswers = [];
+        shuffleArray(questions);
+        quizContainer.style.display = "block";
+        scoreContainer.style.display = "none";
+        loadQuestion();
+    }
+
+    // Start quiz
+    shuffleArray(questions);
+    loadQuestion();
+</script>
+
+</body>
+</html>
